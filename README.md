@@ -1,2 +1,2 @@
 # Negatives_Mixtures
-Code du mémoire sur les mélanges de probas à poids négatif
+Code R de la méthode d'approximation étagée
