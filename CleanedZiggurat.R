@@ -11,7 +11,7 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1){
   }
   bound = ifelse(abs(mean-left_bound)>abs(mean-right_bound),mean+abs(mean-left_bound),right_bound)
   #We're just getting sure that the right bound is the more distant to the mean of our normal law between the left and the right bound
-  intervals=seq(mean,bound,(bound-mean)/numberofboxes)
+  intervals=seq(mean,bound,(bound-mean)/number_of_boxes)
   heights=density(intervals)
   return(list(intervals,heights))
 }
