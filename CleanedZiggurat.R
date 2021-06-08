@@ -1,8 +1,8 @@
 rm(list=ls())
-#We begin by creating the two first function we need to generate our boxes, generate_boxes
-#To do this, we're first going to create a function that generates the boxes on the decreasing
-#part of each normal law, the function we'll then copy and paste the boxes on the increasing part
-#to have a full approximation with boxes of our density.
+#We begin by creating the first function we need to generate our boxes that we'll be called boxes.
+#This function we'll take the bounds we need as an input, the number of boxes, the mean and the
+#standard deviation of our normal law and the type of boxes we need (over or under the curve)
+#And will generate two times the number of boxes to approximate the curve with
 
 boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="over"){
   const=sd*sqrt(2*pi)
@@ -10,28 +10,33 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="o
     return ((1/const)*exp((-(x-mean)^2)/(2*sd^2)))
   }
   bound = ifelse(abs(mean-left_bound)>abs(mean-right_bound),mean+abs(mean-left_bound),right_bound)
+  #print(bound)
   #We're just getting sure that the right bound is the more distant to the mean of our normal law between the left and the right bound
   step=(bound-mean)/number_of_boxes
-  intervals=seq(mean,bound,step)
   if(type=="over"){
+    #If the type is "over" we generate one step further to go one step further on the other side by symmetry
+    #We define the intervals accordingly and generate the heights on the giver intervals
     right_interval=seq(mean,bound+step,step)
     left_interval=sort(-right_interval)+2*mean
-    lr = length(right_interval)-1
-    left_interval=left_interval[1:lr]
-    right_interval=right_interval[1:length(right_interval)-1]
+    length_right = length(right_interval)-1
+    left_interval=left_interval[1:length_right]
+    right_interval=right_interval[1:length_right]
     right_heights=density(right_interval)
-    left_heights=sort(right_heights)[1:length(right_heights)]
+    left_heights=sort(right_heights)[1:length_right]
   }else if(type=="under"){
-    heights=density(seq(mean+step,bound+step,step))
+    #If the type is "under" we also generate one step further in order to translate it of one step
+    #we generate and cut our intervals at the end of the generation
+    right_interval=seq(mean,bound+step,step)
+    right_heights=density(right_interval)[1:length(right_interval)]
+    left_heights=sort(right_heights)[1:length(right_heights)-1]
+    right_heights=right_heights[2:length(right_heights)]
+    print(right_heights)
+    right_interval=right_interval[1:length(right_interval)-1]
+    left_interval=sort(-right_interval)+2*mean-step
   }
   intervals=c(left_interval,right_interval)
   heights=c(left_heights,right_heights)
-  #If we generate boxes under the density we need to go one step further and begin one step further to get sure the boxes stay under the density of our normal law
   return(list(intervals,heights))
-}
-
-symetry=function(intervals,heights,mean,bound){
-  
 }
 
 moyenne=9
