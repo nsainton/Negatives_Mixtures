@@ -14,10 +14,18 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="o
   step=(bound-mean)/number_of_boxes
   intervals=seq(mean,bound,step)
   if(type=="over"){
-    heights=density(intervals)
+    right_interval=seq(mean,bound+step,step)
+    left_interval=sort(-right_interval)+2*mean
+    lr = length(right_interval)-1
+    left_interval=left_interval[1:lr]
+    right_interval=right_interval[1:length(right_interval)-1]
+    right_heights=density(right_interval)
+    left_heights=sort(right_heights)[1:length(right_heights)]
   }else if(type=="under"){
     heights=density(seq(mean+step,bound+step,step))
   }
+  intervals=c(left_interval,right_interval)
+  heights=c(left_heights,right_heights)
   #If we generate boxes under the density we need to go one step further and begin one step further to get sure the boxes stay under the density of our normal law
   return(list(intervals,heights))
 }
@@ -26,8 +34,9 @@ symetry=function(intervals,heights,mean,bound){
   
 }
 
-a<-boxes(number_of_boxes = 10, type = "under")
-x<-a[[1]]
-y<-a[[2]]
+moyenne=9
+a=boxes(mean=moyenne,number_of_boxes = 20, type = "over")
+x=a[[1]]
+y=a[[2]]
 plot(x,y,type='s')
-lines(x,dnorm(x))
+lines(x,dnorm(x,mean=moyenne))
