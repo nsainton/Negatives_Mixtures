@@ -4,7 +4,7 @@ rm(list=ls())
 #standard deviation of our normal law and the type of boxes we need (over or under the curve)
 #And will generate two times the number of boxes to approximate the curve with
 
-boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="over"){
+boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,coefficient=1){
   const=sd*sqrt(2*pi)
   density=function(x){
     return ((1/const)*exp((-(x-mean)^2)/(2*sd^2)))
@@ -13,7 +13,7 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="o
   #print(bound)
   #We're just getting sure that the right bound is the more distant to the mean of our normal law between the left and the right bound
   step=(bound-mean)/number_of_boxes
-  if(type=="over"){
+  if(coefficient>0){
     #If the type is "over" we generate one step further to go one step further on the other side by symmetry
     #We define the intervals accordingly and generate the heights on the giver intervals
     right_interval=seq(mean,bound+step,step)
@@ -23,7 +23,7 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="o
     right_interval=right_interval[1:length_right]
     right_heights=density(right_interval)
     left_heights=sort(right_heights)[1:length_right]
-  }else if(type=="under"){
+  }else if(coefficient<0){
     #If the type is "under" we also generate one step further in order to translate it of one step
     #we generate and cut our intervals at the end of the generation
     right_interval=seq(mean,bound+step,step)
@@ -36,12 +36,13 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,type="o
   }
   intervals=c(left_interval,right_interval)
   heights=c(left_heights,right_heights)
-  return(list(intervals,heights))
+  return(list(intervals,coefficient*heights))
 }
 
-moyenne=9
-a=boxes(mean=moyenne,number_of_boxes = 20, type = "over")
+moyenne=12
+std=5
+a=boxes(mean=moyenne,number_of_boxes = 20,sd=std,coefficient=-2)
 x=a[[1]]
 y=a[[2]]
 plot(x,y,type='s')
-lines(x,dnorm(x,mean=moyenne))
+lines(x,-2*dnorm(x,mean=moyenne,sd=std))
