@@ -30,7 +30,6 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,coeffic
     right_heights=density(right_interval)[1:length(right_interval)]
     left_heights=sort(right_heights)[1:length(right_heights)-1]
     right_heights=right_heights[2:length(right_heights)]
-    print(right_heights)
     right_interval=right_interval[1:length(right_interval)-1]
     left_interval=sort(-right_interval)+2*mean-step
   }
@@ -39,10 +38,24 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,coeffic
   return(list(intervals,coefficient*heights))
 }
 
+generate_boxes = function(weights,means,standard_deviations,numberofboxes=5){
+  lb = qnorm(0.001,min(means),max(standard_deviations))
+  rb = qnorm(0.999,max(means),max(standard_deviations))
+  list_of_normal_boxes = lapply(1:length(weights), function(i){
+    print(i)
+    boxes(left_bound = lb, right_bound = rb, number_of_boxes = numberofboxes, mean=means[i], sd=standard_deviations[i],coefficient = weights[i])
+  })
+  list_of_normal_boxes
+}
+
 moyenne=12
 std=5
+weights=c(2,-1)
+means=c(2,3)
+standard_deviations=c(2,5)
 a=boxes(mean=moyenne,number_of_boxes = 20,sd=std,coefficient=-2)
 x=a[[1]]
 y=a[[2]]
 plot(x,y,type='s')
 lines(x,-2*dnorm(x,mean=moyenne,sd=std))
+b=generate_boxes(weights,means,standard_deviations)
