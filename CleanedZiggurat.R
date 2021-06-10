@@ -47,9 +47,35 @@ generate_boxes = function(weights,means,standard_deviations,numberofboxes=5){
   })
   list_of_dots = lapply(1:size, function(i) list_of_normal_boxes[[i]][[1]])
   list_of_heights = lapply(1:size, function(i) list_of_normal_boxes[[i]][[2]])
-  dots = Reduce(c,list_of_dots)
-  heights = Reduce(c,list_of_heights)
-  dots
+  #In these first lines, we generate the boxes for all the normal laws of the mixture and extract the corresponding heights and dots
+  size_list = length(list_of_dots[[1]])
+  indexed_dots = lapply(1:size, function(i){
+    list_of_dots[[i]] = lapply(1:size_list, function(j){
+      c(list_of_dots[[i]][[j]],round(i,0),round(j,0))
+    })
+  })
+  indexed_heights = lapply(1:size, function(i){
+    list_of_heights[[i]] = lapply(1:size_list, function(j){
+      c(list_of_heights[[i]][[j]],round(i,0),round(j,0))
+    })
+  })
+  #In these two variables we indice the values with two number. The first one represents the position of the normal law in the mixture
+  #and the second one represents the position of the value in the list
+  dots = Reduce(c,indexed_dots)
+  dots = dots[order(sapply(dots,function(x) x[1],simplify = TRUE))]
+  #We now put all the indexed dots in a unique list and are going to put all the summed heights in another one
+  count = rep(1,size_list)
+  heights = lapply(1:length(dots),function(i){
+    if(i==1){
+      summ=sapply(1:size,function(j) indexed_heights[[i]][[1]],simplify = TRUE)
+      sum(summ)
+    }else{
+      summ=sapply(1:size, function(j){
+        if(dots[[i]][[2]]==j) c=1 #empty line just to not forget to continue there
+      })
+    }
+  })
+  indexed_heights
 }
 
 moyenne=12
@@ -57,9 +83,10 @@ std=5
 weights=c(2,-1)
 means=c(2,3)
 standard_deviations=c(2,5)
-a=boxes(mean=moyenne,number_of_boxes = 20,sd=std,coefficient=-2)
+coef=4
+a=boxes(mean=moyenne,number_of_boxes = 20,sd=std,coefficient=coef)
 x=a[[1]]
 y=a[[2]]
 plot(x,y,type='s')
-lines(x,-2*dnorm(x,mean=moyenne,sd=std))
+lines(x,coef*dnorm(x,mean=moyenne,sd=std))
 b=generate_boxes(weights,means,standard_deviations)
