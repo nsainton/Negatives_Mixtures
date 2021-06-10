@@ -41,11 +41,15 @@ boxes=function(left_bound=-1,right_bound=1,number_of_boxes=1,mean=0,sd=1,coeffic
 generate_boxes = function(weights,means,standard_deviations,numberofboxes=5){
   lb = qnorm(0.001,min(means),max(standard_deviations))
   rb = qnorm(0.999,max(means),max(standard_deviations))
-  list_of_normal_boxes = lapply(1:length(weights), function(i){
-    print(i)
+  size = length(weights)
+  list_of_normal_boxes = lapply(1:size, function(i){
     boxes(left_bound = lb, right_bound = rb, number_of_boxes = numberofboxes, mean=means[i], sd=standard_deviations[i],coefficient = weights[i])
   })
-  list_of_normal_boxes
+  list_of_dots = lapply(1:size, function(i) list_of_normal_boxes[[i]][[1]])
+  list_of_heights = lapply(1:size, function(i) list_of_normal_boxes[[i]][[2]])
+  dots = Reduce(c,list_of_dots)
+  heights = Reduce(c,list_of_heights)
+  dots
 }
 
 moyenne=12
