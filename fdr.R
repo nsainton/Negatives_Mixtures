@@ -1,23 +1,32 @@
 
 
 
-n<-100
+set.seed(18)
 
-mixture_density <- function(x,weight=c(2,-1),mean=c(2,2),variance=c(2,1)){
-  mix <-0
-  for(i in 1:length(weight)){
-      mix<-mix + weight[i]*dnorm(x,mean[i],variance[i])
+n <- 100
+
+w=c(2,-1)
+mean=c(2,2)
+sd=c(sqrt(2),1)
+
+
+r1=qnorm(0.001,min(mean),max(sd))
+r2=qnorm(0.999,max(mean),max(sd))
+L=seq(r1,r2,(abs(r1-r2)/n))
+
+
+cumu <- function(x){
+  cumulative <-0
+  for(i in 1:length(mean)){
+    cumulative <- cumulative + w[i]*pnorm(x,mean[i],sd[i])
   }
   
-  return(mix)
-    
+  return(cumulative)
 }
 
-sample<- sort(2*rnorm(n,2,2)-rnorm(n,2,1))
-cumulative<-c()
-for(i in 1:n){
-  cumulative<-c(cumulative,integrate(mixture_density,-Inf,sample[i])$value)
-}
+cumulate<-matrix(nrow=1,ncol=length(L))
+
+cumulate<-lapply(L,cumu)
 
 
 
