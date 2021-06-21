@@ -7,7 +7,7 @@ n <- 100
 
 w=c(2,-1)
 mean=c(2,2)
-sd=c(sqrt(2),1)
+sd=c(2,1)
 
 
 r1=qnorm(0.001,min(mean),max(sd))
