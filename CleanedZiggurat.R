@@ -37,7 +37,7 @@ boxes <- function(inf, sup, number_of_boxes, mean, sd, coef) {
   }
   intervals <- c(left_interval, right_interval)
   heights <- c(left_heights, right_heights)
-  heights <- 0.9999 * coef * heights
+  heights <- coef * heights
   return(list("dots" = intervals, "heights" = heights))
 }
 
@@ -91,7 +91,20 @@ cumulative_area <- function(dots, heights) {
   })
 }
 
-simulation <- function()
+simulation <- function(weights, means, sd, number_of_boxes, to_generate) {
+  mixture <- function(x) {
+    normal_laws <- lapply(seq_len(length(weights)), function(i) {
+      weights[i] * dnorm(x, mean = means[i], sd = sd[i])
+    })
+    Reduce("+", normal_laws)
+  }
+  boxes <- generate_boxes(weights, means, sd, number_of_boxes)
+  dots <- boxes$dots
+  heights <- boxes$heights
+  area <- area(dots, heights)
+  cumulative_area <- cumulative_area(dots, heights)
+  adjusted_area <- cumulative_area / area
+}
 
 moyenne <- 11
 std <- 4
@@ -111,10 +124,9 @@ b <- generate_boxes(weights, means, standard_deviations, nb)
 x1 <- b$dots
 y1 <- b$heights
 plot(x1, y1, type = "s")
-z1 <- lapply(1:size, function(i) {
+z <- lapply(1:size, function(i) {
   weights[i] * dnorm(x1, means[i], standard_deviations[i])
 })
-
-z <- z1[[1]] + z1[[2]]
+z <- Reduce("+", z)
 lines(x1, z)
 are <- cumulative_area(x1, y1)
