@@ -31,8 +31,8 @@ boxes <- function(inf, sup, number_of_boxes, mean, sd, coef) {
     right_interval <- seq(mean, bound + step, step)
     right_heights <- dnorm(right_interval, mean, sd)[seq_len(length(right_interval))]
     left_heights <- rev(right_heights)[seq_len(length(right_heights) - 1)]
-    right_heights <- right_heights[seq(2,length(right_heights))]
-    right_interval <- right_interval[seq_len(length(right_interval)-1)]
+    right_heights <- right_heights[seq(2, length(right_heights))]
+    right_interval <- right_interval[seq_len(length(right_interval) - 1)]
     left_interval <- rev(-right_interval) + 2 * mean - step
   }
   intervals <- c(left_interval, right_interval)
@@ -75,21 +75,23 @@ generate_boxes <- function(weights, means, sd, number_of_boxes) {
   list("dots" = dots, "heights" = heights)
 }
 
-area <- function(dots, heights){
-  size = length(dots)
-  boxes <- lapply(2:size, function(i){
-    heights[i-1]*(dots[i]-dots[i-1])
+area <- function(dots, heights) {
+  size <- length(dots)
+  boxes <- lapply(2:size, function(i) {
+    heights[i - 1] * (dots[i] - dots[i - 1])
   })
   boxes <- unlist(boxes)
   sum(boxes)
 }
 
-cumulative_area <- function(dots, heights){
-  size = length(dots)
-  areas <- lapply(2:size, function(i){
-    area(dots[1:i],heights[1:i])
+cumulative_area <- function(dots, heights) {
+  size <- length(dots)
+  areas <- lapply(2:size, function(i) {
+    area(dots[1:i], heights[1:i])
   })
 }
+
+simulation <- function()
 
 moyenne <- 11
 std <- 4
@@ -115,4 +117,4 @@ z1 <- lapply(1:size, function(i) {
 
 z <- z1[[1]] + z1[[2]]
 lines(x1, z)
-are <- cumulative_area(x1,y1)
+are <- cumulative_area(x1, y1)
