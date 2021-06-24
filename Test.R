@@ -1,4 +1,4 @@
-source("/Users/noahsaintonge/Documents/M1/Mémoire/Juin/Negative_Mixtures/CleanedZiggurat.R")
+source("https://raw.githubusercontent.com/poulem/Negatives_Mixtures/main/CleanedZiggurat.R")
 moyenne <- 11
 std <- 4
 nb <- 10000
