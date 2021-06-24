@@ -17,9 +17,21 @@ b <- generate_boxes(weights, means, standard_deviations, nb)
 x1 <- b$dots
 y1 <- b$heights
 plot(x1, y1, type = "s")
-z1 <- lapply(1:size, function(i) {
+z <- lapply(1:size, function(i) {
   weights[i] * dnorm(x1, means[i], standard_deviations[i])
 })
-
-z <- z1[[1]] + z1[[2]]
+z <- Reduce('+',z)
 lines(x1, z)
+are <- cumulative_area(x1, y1)
+
+mono_increase <- function(vect){
+  vect=unlist(vect)
+  mono_inc <- rep(0,length(vect))
+  for(i in seq(length(mono_inc)-1)){
+    if(vect[i+1]>=vect[i]) mono_inc[i]=1
+    else mono_inc[i] = 0
+  }
+  mono_inc
+}
+d=mono_increase(are)
+a=simulation(weights,means,standard_deviations,nb,nv)
