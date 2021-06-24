@@ -55,7 +55,6 @@ generate_boxes <- function(weights, means, sd, number_of_boxes) {
   dots <- dots[order(sapply(dots, function(x) x, simplify = TRUE))]
   number_of_dots <- length(dots)
   heights <- rep(0, number_of_dots)
-  #print(length(list_of_dots[[1]]))
   for (i in 1:number_of_dots) {
     for (j in 1:size) {
       if (i > 1 && dots[[i]] != dots[[i - 1]] || i == 1) {
@@ -71,7 +70,7 @@ generate_boxes <- function(weights, means, sd, number_of_boxes) {
         heights[[i]] <- heights[[i]] + list_of_heights[[j]][[rank_to_add]]
       }
     }
-    heights[[i]] <- heights[[i]]+0.005
+    heights[[i]] <- heights[[i]] + 0.005
   }
   list("dots" = dots, "heights" = heights)
 }
@@ -87,10 +86,10 @@ area <- function(dots, heights) {
 
 cumulative_area <- function(dots, heights) {
   size <- length(dots)
-  areas <- rep(0,size-1)
+  areas <- rep(0, size - 1)
   areas[1] <- heights[1] * (dots[2] - dots[1])
-  for(i in seq(2,size-1,1)){
-    areas[i] <- areas[i-1] + heights[i - 1] * (dots[i] - dots[i - 1])
+  for (i in seq(2, size - 1, 1)) {
+    areas[i] <- areas[i - 1] + heights[i - 1] * (dots[i] - dots[i - 1])
   }
   areas
 }
@@ -108,45 +107,17 @@ simulation <- function(weights, means, sd, number_of_boxes, number_of_variates) 
   area <- area(dots, heights)
   cumulative_area <- cumulative_area(dots, heights)
   adjusted_area <- cumulative_area / area
-  
-  uniform <- runif(number_of_variates)
-  #we're selecting the box by stopping right after the last box
-  #with a value smaller than our uniform
-  sample <- sapply(uniform, function(choice){
-    to_sample <- length(adjusted_area[adjusted_area<=choice])
+  # we're selecting the box by stopping right after the last box
+  # with a value smaller than our uniform
+  sample <- sapply(1:number_of_variates, function(i) {
     absc <- 0
     ord <- .Machine$integer.max
-    while(mixture(absc)<ord){
-      absc <- runif(1, min = dots[to_sample], max = dots[to_sample+1])
-      ord <- runif(1, min=0, max = max(heights[to_sample],heights[to_sample+1]))
+    while (mixture(absc) < ord) {
+      uniform <- runif(1)
+      to_sample <- length(adjusted_area[adjusted_area <= uniform])
+      absc <- runif(1, min = dots[to_sample], max = dots[to_sample + 1])
+      ord <- runif(1, min = 0, max = max(heights[to_sample], heights[to_sample + 1]))
     }
-    ord
-  },simplify = TRUE)
+    absc
+  }, simplify = TRUE)
 }
-
-moyenne <- 11
-std <- 4
-nb <- 10000
-nv <- 10000
-weights <- c(2, -1)
-means <- c(2, 2)
-size <- length(weights)
-standard_deviations <- c(2, 1)
-co <- 2
-a <- boxes(inf = -1, sup = 1, mean = moyenne, number_of_boxes = nb, sd = std, coef = co)
-x <- a$dots
-y <- a$heights
-plot(x, y, type = "s")
-t <- co * dnorm(x, mean = moyenne, sd = std)
-lines(x, t)
-b <- generate_boxes(weights, means, standard_deviations, nb)
-x1 <- b$dots
-y1 <- b$heights
-plot(x1, y1, type = "s")
-z <- lapply(1:size, function(i) {
-  weights[i] * dnorm(x1, means[i], standard_deviations[i])
-})
-z <- Reduce("+", z)
-lines(x1, z)
-#are <- cumulative_area(x1, y1)
-a=simulation(weights,means,standard_deviations,nb,nv)
