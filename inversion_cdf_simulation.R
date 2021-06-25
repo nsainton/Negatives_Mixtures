@@ -12,5 +12,3 @@ invcdf <- function(q, w, mean, sd, n=1, n_points=100) {
   u <- runif(n)
   return(inv(u))
 }
-n <- invcdf(0, c(2, -1), c(2, 2), c(2, 1), 100000, 100)
-hist(n, breaks = 100)
