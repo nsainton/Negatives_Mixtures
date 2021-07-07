@@ -1,20 +1,12 @@
-
 set.seed(18)
 
 
-n <- 100
-w <- c(2, -1)
-mean <- c(2, 2)
-sd <- c(2, 1)
-
-cumu <- function(x, w=c(2, -1), mean=c(2, 2), sd=c(2, 1)) {
-  cumulative <- 0
-  for (i in 1:length(mean)) {
-    cumulative <- cumulative + w[i] * pnorm(x, mean[i], sd[i])
-  }
-  return(cumulative)
+cumu <- function(x, w = c(2, -1), mean = c(2, 2), sd = c(2, 1)) {
+  normal_laws <- lapply(seq_len(length(w)), function(i) {
+    w[i] * pnorm(x, mean = mean[i], sd = sd[i])
+  })
+  Reduce("+", normal_laws)
 }
-
 #Calcul de la fdr
 fdr <- function(n=100, w=c(2, -1), mean=c(2, 2), sd=c(2, 1)) {
   r_1 <- qnorm(0.001, min(mean), max(sd))
@@ -32,39 +24,37 @@ mixture <- function(x) {
   Reduce("+", normal_laws)
 }
 
-Liste <- fdr(n, w, mean, sd)[[2]]
-cumulate <- fdr(n, w, mean, sd)[[1]]
-
-simulate <- function(n = 1000) {
+simulate <- function(w, mean, sd, n, m) {
   
-  U_1 <- runif(n)
-  nbAGenerer <- rep(0, length(Liste))
+  liste <- fdr(m, w, mean, sd)[[2]]
+  cumulate <- fdr(m, w, mean, sd)[[1]]
+  u_1 <- runif(n)
+  nb_to_generate <- rep(0, length(liste))
   nbGenere <- 0
   res <- rep(0, n)
   for (i in 1:(length(cumulate) - 1)) {
     nbGenere <- 0
     #Choisis selon quel rectangle de la fdr on va générer
-    AGenerer <- which(U_1 < cumulate[i + 1] & U_1 >= cumulate[i])
-    nbAGenerer[i] <- length(AGenerer)
+    to_generate <- which(u_1 < cumulate[i + 1] & u_1 >= cumulate[i])
+    nb_to_generate[i] <- length(to_generate)
     #Acceptation rejet
-    while (nbGenere < nbAGenerer[i]) {
+    while (nbGenere < nb_to_generate[i]) {
       #Une fois que l'on sait dans quel rectangle tirer Y, C'est une loi uniforme entre 2 points
-      Y <- runif((nbAGenerer[i] - nbGenere), min = Liste[i], max = Liste[i + 1])
-      U_2 <- runif((nbAGenerer[i] - nbGenere))
-      height <- max(mixture(Liste[i]), mixture(Liste[i + 1]))
-      Acceptes <- which((height * U_2) <= mixture(Y))
-      if (length(Acceptes) > 0) {
-        res[AGenerer[(nbGenere + 1):min((nbGenere + length(Acceptes)), nbAGenerer[i])]]=Y[Acceptes[1 : min(nbAGenerer[i], length(Acceptes))]]
-        nbGenere=nbGenere + length(Acceptes)
+      Y <- runif((nb_to_generate[i] - nbGenere), min = liste[i], max = liste[i + 1])
+      u_2 <- runif((nb_to_generate[i] - nbGenere))
+      height <- max(mixture(liste[i]), mixture(liste[i + 1]))
+      acceptate <- which((height * u_2) <= mixture(Y))
+      if (length(acceptate) > 0) {
+        res[to_generate[(nbGenere + 1):min((nbGenere + length(acceptate)), nb_to_generate[i])]]=Y[acceptate[1 : min(nb_to_generate[i], length(acceptate))]]
+        nbGenere=nbGenere + length(acceptate)
       }
     }
   }
   return(res)
 }
 
-res <- simulate(100)
+res <- simulate(c(2,-1), c(2,2), c(2,1), 10000, 100)
 p1 <- hist(main = "Répartition des valeurs générées", xlab = "Valeurs", ylab = "Répartition", res, breaks = 100, freq = FALSE)
 curve(2 * dnorm(x, 2, 2) - dnorm(x, 2, 1), add = TRUE, col = "red")
 
-microbenchmark::microbenchmark(simulate(100000))
-
+microbenchmark::microbenchmark(simulate(c(2,-1), c(2,2), c(2,1), 10000, 10))
