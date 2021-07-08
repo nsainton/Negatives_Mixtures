@@ -65,6 +65,6 @@ n<-100
 
 res <- simulate(w, mean, sd, n, m)
 p1 <- hist(main = "Répartition des valeurs générées", xlab = "Valeurs", ylab = "Répartition", res, breaks = 100, freq = FALSE)
-curve(2 * dnorm(x, 2, 2) - dnorm(x, 2, 1)+ dnorm(x,3,2), add = TRUE, col = "red")
+curve(2 * dnorm(x, 2, 2) - dnorm(x, 2, 1), add = TRUE, col = "red")
 
 microbenchmark::microbenchmark(simulate(w, mean, sd, n, m))
