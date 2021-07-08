@@ -1,19 +1,19 @@
 set.seed(18)
 
 
-cumu <- function(x, w = c(2, -1), mean = c(2, 2), sd = c(2, 1)) {
+cumu <- function(x, w, mean, sd) {
   normal_laws <- lapply(seq_len(length(w)), function(i) {
     w[i] * pnorm(x, mean = mean[i], sd = sd[i])
   })
   Reduce("+", normal_laws)
 }
 #Calcul de la fdr
-fdr <- function(n=100, w=c(2, -1), mean=c(2, 2), sd=c(2, 1)) {
+fdr <- function(n=100, w, mean, sd) {
   r_1 <- qnorm(0.001, min(mean), max(sd))
   r_2 <- qnorm(0.999, max(mean), max(sd))
   K <- seq(r_1, r_2, (abs(r_1 - r_2) / n))
   cumulate <- matrix(nrow = 1, ncol = length(K))
-  cumulate <- lapply(K, cumu)
+  cumulate <- lapply(K, function(x) cumu(x, w, mean, sd))
   return(list(cumulate, K))
 }
 
@@ -53,8 +53,14 @@ simulate <- function(w, mean, sd, n, m) {
   return(res)
 }
 
-res <- simulate(c(2,-1), c(2,2), c(2,1), 10000, 100)
+w<- c(2,-1)
+mean <- c(2,2)
+sd <- c(2,1)
+m<-10
+n<-100
+
+res <- simulate(w, mean, sd, n, m)
 p1 <- hist(main = "Répartition des valeurs générées", xlab = "Valeurs", ylab = "Répartition", res, breaks = 100, freq = FALSE)
 curve(2 * dnorm(x, 2, 2) - dnorm(x, 2, 1), add = TRUE, col = "red")
 
-microbenchmark::microbenchmark(simulate(c(2,-1), c(2,2), c(2,1), 10000, 10))
+microbenchmark::microbenchmark(simulate(w, mean, sd, n, m))
