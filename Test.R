@@ -1,8 +1,8 @@
 source("https://raw.githubusercontent.com/poulem/Negatives_Mixtures/main/CleanedZiggurat.R")
 moyenne <- 11
 std <- 4
-nb <- 10000
-nv <- 10000
+nb <- 1000
+nv <- 1000
 weights <- c(2, -1)
 means <- c(2, 2)
 size <- length(weights)

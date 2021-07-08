@@ -14,7 +14,7 @@ boxes <- function(inf, sup, number_of_boxes, mean, sd, coef) {
   step <- (bound - mean) / number_of_boxes
   if (coef > 0) {
     # If the coefficient is positive we generate one step further
-    # to go one step further on the other side by symmetry
+    # to go one step furthéer on the other side by symmetry
     # We define the intervals accordingly and
     # generate the heights on the giver intervals
     right_interval <- seq(mean, bound + step, step)
@@ -42,8 +42,8 @@ boxes <- function(inf, sup, number_of_boxes, mean, sd, coef) {
 }
 
 generate_boxes <- function(weights, means, sd, number_of_boxes) {
-  lb <- qnorm(0.001, min(means), max(sd))
-  rb <- qnorm(0.999, max(means), max(sd))
+  lb <- qnorm(10** (-15), min(means), max(sd))
+  rb <- qnorm(1 - 1 * 10** (-15), max(means), max(sd))
   size <- length(weights)
   list_of_normal_boxes <- lapply(1:size, function(i) {
     boxes(inf = lb, sup = rb, number_of_boxes = number_of_boxes, mean = means[i], sd = sd[i], coef = weights[i])
@@ -72,7 +72,7 @@ generate_boxes <- function(weights, means, sd, number_of_boxes) {
     }
     heights[[i]] <- heights[[i]] + 0.005
   }
-  list("dots" = dots, "heights" = heights)
+  list("dots" = dots, "heights" = heights, "left_bound" = lb, "right_bound" = rb)
 }
 
 area <- function(dots, heights) {
@@ -80,8 +80,7 @@ area <- function(dots, heights) {
   boxes <- lapply(2:size, function(i) {
     heights[i - 1] * (dots[i] - dots[i - 1])
   })
-  boxes <- unlist(boxes)
-  sum(boxes)
+  Reduce("+", boxes)
 }
 
 cumulative_area <- function(dots, heights) {
@@ -107,16 +106,41 @@ simulation <- function(weights, means, sd, number_of_boxes, number_of_variates) 
   area <- area(dots, heights)
   cumulative_area <- cumulative_area(dots, heights)
   adjusted_area <- cumulative_area / area
+  left_mixture_bound <- boxes$left_bound
+  right_mixture_bound <- boxes$right_bound
   # we're selecting the box by stopping right after the last box
   # with a value smaller than our uniform
   sample <- sapply(1:number_of_variates, function(i) {
-    absc <- 0
-    ord <- .Machine$integer.max
-    while (mixture(absc) < ord) {
-      uniform <- runif(1)
-      to_sample <- length(adjusted_area[adjusted_area <= uniform])
-      absc <- runif(1, min = dots[to_sample], max = dots[to_sample + 1])
-      ord <- runif(1, min = 0, max = max(heights[to_sample], heights[to_sample + 1]))
+    maxim <- as.integer(.Machine$integer.max)
+    absc <- maxim
+    ord <- maxim
+    localisation <- runif(1)
+    if (localisation > 1 - 10** (-4)) {
+      choice <- round(runif(1, 0, 2))
+      if (choice) {
+        print(1)
+        while (mixture(absc) < ord) {
+          dot <- runif(1, right_mixture_bound, maxim)
+          ordo <- mixture(dot)
+          absc <- runif(1, dot, maxim)
+          ord <- runif(1, 0, ordo)
+        }
+      } else {
+        print(0)
+        while (mixture(absc) < ord) {
+          dot <- runif(1, -maxim, left_mixture_bound)
+          ordo <- mixture(dot)
+          absc <- runif(1, -maxim, dot)
+          ord <- runif(1, 0, ordo)
+        }
+      }
+    } else {
+      while (mixture(absc) < ord) {
+        uniform <- runif(1)
+        to_sample <- sum(adjusted_area <= uniform)
+        absc <- runif(1, min = dots[to_sample], max = dots[to_sample + 1])
+        ord <- runif(1, min = 0, max = max(heights[to_sample], heights[to_sample + 1]))
+      }
     }
     absc
   }, simplify = TRUE)
