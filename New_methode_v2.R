@@ -11,10 +11,14 @@ cumu <- function(x, w, mean, sd) {
 fdr <- function(n=100, w, mean, sd) {
   r_1 <- qnorm(0.001, min(mean), max(sd))
   r_2 <- qnorm(0.999, max(mean), max(sd))
-  K <- seq(r_1, r_2, (abs(r_1 - r_2) / n))
-  cumulate <- matrix(nrow = 1, ncol = length(K))
-  cumulate <- lapply(K, function(x) cumu(x, w, mean, sd))
-  return(list(cumulate, K))
+  k <- seq(r_1, r_2, (abs(r_1 - r_2) / n))
+  for (i in length(w)){
+    k<- c(k, mean[i])
+  }
+  k<-sort(k)
+  cumulate <- matrix(nrow = 1, ncol = length(k))
+  cumulate <- lapply(k, function(x) cumu(x, w, mean, sd))
+  return(list(cumulate, k))
 }
 
 mixture <- function(x) {
@@ -61,6 +65,6 @@ n<-100
 
 res <- simulate(w, mean, sd, n, m)
 p1 <- hist(main = "Répartition des valeurs générées", xlab = "Valeurs", ylab = "Répartition", res, breaks = 100, freq = FALSE)
-curve(2 * dnorm(x, 2, 2) - dnorm(x, 2, 1), add = TRUE, col = "red")
+curve(2 * dnorm(x, 2, 2) - dnorm(x, 2, 1)+ dnorm(x,3,2), add = TRUE, col = "red")
 
 microbenchmark::microbenchmark(simulate(w, mean, sd, n, m))
