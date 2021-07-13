@@ -2,7 +2,7 @@
 
 set.seed(18)
 
-cumu <- function(x,w=c(2,-1),mean=c(2,2),sd=c(2,1)){
+pmixture <- function(x,w=c(2,-1),mean=c(2,2),sd=c(2,1)){
   cumulative <-0
   for(i in 1:length(mean)){
     cumulative <- cumulative + w[i]*pnorm(x,mean[i],sd[i])
@@ -11,7 +11,7 @@ cumu <- function(x,w=c(2,-1),mean=c(2,2),sd=c(2,1)){
   return(cumulative)
 }
 
-fdr<- function(n=100,w=c(2,-1),mean=c(2,2),sd=c(2,1)){
+dmixture<- function(n=100,w=c(2,-1),mean=c(2,2),sd=c(2,1)){
   
   r1=qnorm(0.001,min(mean),max(sd))
   r2=qnorm(0.999,max(mean),max(sd))
